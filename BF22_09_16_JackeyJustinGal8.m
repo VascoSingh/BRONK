@@ -2,6 +2,7 @@
 %% Image Folder Location 
     %User Defines location of Image file and location of directory to
     %export to.
+    
 clc, clear, close all
 r=bfGetReader();
 ImgFile=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Jackey\2022-09-15-Gal8-ConjugatesChloroquine\220915-Gal8-Jackey001.nd2');
