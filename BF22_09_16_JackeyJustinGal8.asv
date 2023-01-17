@@ -2,7 +2,27 @@
 %% Image Folder Location 
     %User Defines location of Image file and location of directory to
     %export to.
+    
 clc, clear, close all
+Identifier = ["ST"                                  
+    "e5a03cec-4a80-11e4-9553-005056977bd0"
+    "DM"                                  
+    "IP"                                  
+    "3c4d8530-865a-46cb-bd2b-6c4026359270"
+    "d1ff6c34-6cbf-4379-8fc7-710f710a1e09"];
+Identifier = array2table(Identifier);
+addons = matlab.addons.installedAddons;
+addons = addons(:,4);
+hasAddons = ismember(Identifier, addons);
+if hasAddons(4) == 0 
+    fprintf("writeFCS(fname, DATA, TEXT, OTHER) MATLAB addon must be installed");
+end
+if hasAddons(5) == 0 
+    fprintf("Microscopy Image Browser 2 (MIB2) MATLAB addon must be installed");
+end
+if hasAddons(6) == 0 
+    fprintf("ND2 Reader 0.1.1 MATLAB addon must be installed");
+end
 r=bfGetReader();
 ImgFile=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Jackey\2022-09-15-Gal8-ConjugatesChloroquine\220915-Gal8-Jackey001.nd2');
 r = loci.formats.Memoizer(bfGetReader(),0);
@@ -168,8 +188,8 @@ AllData4={}; %Blank for Parfor CompSci reasons
                 r2.setSeries(CurrSeries); %##uses BioFormats function, can be swapped with something else (i forget what) if it's buggy with the GUI
                 fname = r2.getSeries; %gets the name of the series using BioFormats
                 Well=num2str(fname,'%05.f'); %Formats the well name for up to 5 decimal places of different wells, could increase but 5 already feels like overkill 
-                T_Value = r2.getSizeT()-1; %Very important, the timepoints of the images. Returns the total number of timepoints, the -1 is important.
-%                 T_Value = 17
+                timepoints = double(0):double(T_Value); %Very important, the timepoints of the images. Returns the total number of timepoints, the -1 is important.
+
                 SizeX=r2.getSizeX(); %Number of pixels in image in X dimension
                 SizeY=r2.getSizeY(); %Number of pixels in image in Y Dimension
                     
@@ -180,7 +200,7 @@ AllData4={}; %Blank for Parfor CompSci reasons
                     end
                     end
                     AllData2={};%Clear because parfor 
-                    for i=0:T_Value %For all of the time points in the series, should start at zero if T_Value has -1 built in, which it should
+                    for i=timepoints %For all of the time points in the series, should start at zero if T_Value has -1 built in, which it should
                         Img2=zeros(SizeY,SizeX,numPlanes,'uint16');  %Make a blank shell for the images  
                                 iplane=r2.getIndex(0,0,i);
                                 for n=1:numPlanes         

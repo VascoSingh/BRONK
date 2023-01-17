@@ -2,8 +2,28 @@
 %% Image Folder Location 
     %User Defines location of Image file and location of directory to
     %export to.
-    
 clc, clear, close all
+
+Identifier = ["ST"                                  
+    "e5a03cec-4a80-11e4-9553-005056977bd0"
+    "DM"                                  
+    "IP"                                  
+    "3c4d8530-865a-46cb-bd2b-6c4026359270"
+    "d1ff6c34-6cbf-4379-8fc7-710f710a1e09"];
+Identifier = array2table(Identifier);
+addons = matlab.addons.installedAddons;
+addons = addons(:,4);
+hasAddons = ismember(Identifier, addons);
+if hasAddons(4) == 0 
+    fprintf("writeFCS(fname, DATA, TEXT, OTHER) MATLAB addon must be installed");
+end
+if hasAddons(5) == 0 
+    fprintf("Microscopy Image Browser 2 (MIB2) MATLAB addon must be installed");
+end
+if hasAddons(6) == 0 
+    fprintf("ND2 Reader 0.1.1 MATLAB addon must be installed");
+end
+
 r=bfGetReader();
 ImgFile=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Jackey\2022-09-15-Gal8-ConjugatesChloroquine\220915-Gal8-Jackey001.nd2');
 r = loci.formats.Memoizer(bfGetReader(),0);
