@@ -15,13 +15,16 @@ addons = matlab.addons.installedAddons;
 addons = addons(:,4);
 hasAddons = ismember(Identifier, addons);
 if hasAddons(4) == 0 
-    fprintf("writeFCS(fname, DATA, TEXT, OTHER) MATLAB addon must be installed");
+    fprintf("writeFCS(fname, DATA, TEXT, OTHER) MATLAB add on must be installed");
 end
 if hasAddons(5) == 0 
-    fprintf("Microscopy Image Browser 2 (MIB2) MATLAB addon must be installed");
+    fprintf("Microscopy Image Browser 2 (MIB2) MATLAB add on must be installed");
 end
 if hasAddons(6) == 0 
-    fprintf("ND2 Reader 0.1.1 MATLAB addon must be installed");
+    fprintf("ND2 Reader 0.1.1 MATLAB add on must be installed");
+end
+if hasAddons(4) == 0 || hasAddons(5) == 0 || hasAddons(6) == 0
+    return;
 end
 
 r=bfGetReader();
