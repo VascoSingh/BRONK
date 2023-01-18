@@ -3,7 +3,6 @@
     %User Defines location of Image file and location of directory to
     %export to.
 clc, clear, close all
-
 Identifier = ["ST"                                  
     "e5a03cec-4a80-11e4-9553-005056977bd0"
     "DM"                                  
