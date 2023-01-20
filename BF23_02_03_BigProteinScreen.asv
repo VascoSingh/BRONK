@@ -3,7 +3,7 @@ clc, clear all, close all
 %% USER: Basic Aspects 
     %User Defines location of Image file and location of directory to
     %export to.
-ImgFile=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\20211002BigProteinScreen.nd2');
+ImgFile=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\20211002BigProteinScreen001.nd2');
 exportdir=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\2023-01-02-Dissertation Analysis');
     
     %Basic Information
@@ -45,6 +45,9 @@ BitDepth=12; %The bit depth of your microscopy images, generally 8, 12, or 16 bi
    % not solving this problem, then going into the associated function
    % within this same folder can help.
    
+   % Column 1: Function Name
+   % Column 2: Image Channel
+   % Column 3: 
 ImageAnalyses=    {
 
 %                          {{'Nuc'},{1},{1 0.02},{3},{'Nuc_bw4_perim' [0.8500 0.3250 0.0980]},{true},{}};
