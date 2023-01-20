@@ -22,7 +22,6 @@ end
 if hasAddons(4) == 0 || hasAddons(5) == 0 || hasAddons(6) == 0
     return;
 end
-
 %% USER: Basic Aspects 
     %User Defines location of Image file and location of directory to
     %export to.
