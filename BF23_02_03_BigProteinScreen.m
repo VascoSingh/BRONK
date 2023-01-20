@@ -68,6 +68,7 @@ BitDepth=12; %The bit depth of your microscopy images, generally 8, 12, or 16 bi
    % not solving this problem, then going into the associated function
    % within this same folder can help.
    
+  
 ImageAnalyses=    {
 
 %                          {{'Nuc'},{1},{1 0.02},{3},{'Nuc_bw4_perim' [0.8500 0.3250 0.0980]},{true},{}};
