@@ -10,23 +10,23 @@ Identifier = array2table(Identifier);
 addons = matlab.addons.installedAddons;
 addons = addons(:,4);
 hasAddons = ismember(Identifier, addons);
-if hasAddons(4) == 0 
-    fprintf("writeFCS(fname, DATA, TEXT, OTHER) MATLAB add on must be installed");
+if hasAddons(2) == 0 
+    fprintf("writeFCS(fname, DATA, TEXT, OTHER) MATLAB add on must be installed ");
 end
 if hasAddons(5) == 0 
-    fprintf("Microscopy Image Browser 2 (MIB2) MATLAB add on must be installed");
+    fprintf("ND2 Reader 0.1.1 MATLAB add on must be installed ");
 end
 if hasAddons(6) == 0 
-    fprintf("ND2 Reader 0.1.1 MATLAB add on must be installed");
+    fprintf("Microscopy Image Browser 2 (MIB2) MATLAB add on must be installed ");
 end
-if hasAddons(4) == 0 || hasAddons(5) == 0 || hasAddons(6) == 0
+if hasAddons(2) == 0 || hasAddons(5) == 0 || hasAddons(6) == 0
     return;
 end
 %% USER: Basic Aspects 
     %User Defines location of Image file and location of directory to
     %export to.
-ImgFile=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\20211002BigProteinScreen001.nd2');
-exportdir=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\2023-01-02-Dissertation Analysis');
+ImgFile=char('D:\Dropbox (VU Basic Sciences)\LabConfocalOld\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\20211002BigProteinScreen001.nd2');
+exportdir=char('D:\Dropbox (VU Basic Sciences)\LabConfocalOld\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\2023-01-02-Dissertation Analysis');
     
     %Basic Information
 numPlanes=3; %How many image Planes to analyze? For example, If you have a Blue (DAPI), Green (GFP), and Red (Cy5) channel, this would be 3 
