@@ -1,13 +1,35 @@
 %% Gal8 Recruitment MATLAB Program
 clc, clear all, close all
+Identifier = ["ST"                                  
+    "e5a03cec-4a80-11e4-9553-005056977bd0"
+    "DM"                                  
+    "IP"                                  
+    "3c4d8530-865a-46cb-bd2b-6c4026359270"
+    "d1ff6c34-6cbf-4379-8fc7-710f710a1e09"];
+Identifier = array2table(Identifier);
+addons = matlab.addons.installedAddons;
+addons = addons(:,4);
+hasAddons = ismember(Identifier, addons);
+if hasAddons(2) == 0 
+    fprintf("writeFCS(fname, DATA, TEXT, OTHER) MATLAB add on must be installed ");
+end
+if hasAddons(5) == 0 
+    fprintf("ND2 Reader 0.1.1 MATLAB add on must be installed ");
+end
+if hasAddons(6) == 0 
+    fprintf("Microscopy Image Browser 2 (MIB2) MATLAB add on must be installed ");
+end
+if hasAddons(2) == 0 || hasAddons(5) == 0 || hasAddons(6) == 0
+    return;
+end
 %% USER: Basic Aspects 
     %User Defines location of Image file and location of directory to
     %export to.
-ImgFile=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Larry Stokes\23_01_31_Carli Gal8_2nd attempt\20230131_5_55pm.nd2');
-exportdir=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Larry Stokes\Gal8 Processing\20230127_Carli_Gal8_2nd try');
+ImgFile=char('C:\Users\Duval\Downloads\20211002BigProteinScreen.nd2');
+exportdir=char('D:\Dropbox (VU Basic Sciences)\LabConfocalOld\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\2023-01-02-Dissertation Analysis');
     
     %Basic Information
-numPlanes=2; %How many image Planes to analyze? For example, If you have a Blue (DAPI), Green (GFP), and Red (Cy5) channel, this would be 3 
+numPlanes=3; %How many image Planes to analyze? For example, If you have a Blue (DAPI), Green (GFP), and Red (Cy5) channel, this would be 3 
 BaxExport=true; %Do you wish to export images to folder so they can be analyzed using BaxterAlgorithms? Takes more storage but generally a good idea
 MakeCompImage=true; %Make a composite Image of the various channels and segmentation?  MakeCompImage is useful for storing your segements for quick
                 %         checks, but will take up more storage space. It's reccomended to
@@ -15,8 +37,8 @@ MakeCompImage=true; %Make a composite Image of the various channels and segmenta
                 %         you're anlayzing a very large file. you can always use the
                 %         BaxExport and Segment images to check everything in Baxter
                 %         Algorithms.
-UseNvidiaGPU=true;
-Parallelize=true; %Take advantage of multiple processing cores? Generally a good idea but can cause some computers to overheat
+
+Parallelize=false; %Take advantage of multiple processing cores? Generally a good idea but can cause some computers to overheat
                         %Note: For troubleshooting, can be useful to change the "parfor"
                         %loop below into a regular for loop, which will stop parralel
                         %processing but allow error codes to report what's actually wrong.
@@ -45,14 +67,15 @@ BitDepth=12; %The bit depth of your microscopy images, generally 8, 12, or 16 bi
    % not solving this problem, then going into the associated function
    % within this same folder can help.
    
+  
 ImageAnalyses=    {
 
 %                          {{'Nuc'},{1},{1 0.02},{3},{'Nuc_bw4_perim' [0.8500 0.3250 0.0980]},{true},{}};
-                          {{'Cyt'},   {2},{1 0.005},   {2},    {[0 1 1]},{true},{[0 0.05]}};  
-                          {{'NucPlus'},{1},{10 2 0 0.05 [20 80]},  {3},    {[0 0 1]},{true},{[0 0.05]}};                        
-                          {{'CytWS'}, {2},{2 1 8},      {},     {},{false},{[0 0.2]}};
-                            {{'Gal8'},  {2},{0.02 3},  {},     {[1 0 1]},{true},{[0 0.2]}};
-%                            {{'Gal8'},  {3},{0.1 3},  {1},     {[1 1 0]},{true},{[0.1 0.25]}};
+                          {{'Cyt'},   {2},{2 0.15},   {2},    {},{false},{[0 0.2]}};  
+                          {{'NucPlus'},{1},{7 2 2 0.04 [20 80]},  {3},    {[0 0 1]},{true},{[0 0.05]}};                        
+                          {{'CytWS'}, {2},{2 1 8},      {},     {[0 1 1]},{true},{[0 0.2]}};
+                            {{'Gal8'},  {2},{0.1 3},  {},     {[1 0 1]},{true},{[0 0.2]}};
+                            {{'Gal8'},  {3},{0.1 3},  {1},     {[1 1 0]},{true},{[0.1 0.25]}};
 %                            {{'Drug'},  {3},{0.9},      {1},    {[0.8500 0.3250 0.0980]},{true},{}};
 %                         {{'Gal8'},{2},{0.01},{},{'Gal_bw4_Perim' [0.4940, 0.1840, 0.5560]},{true},{}};
 %                         {{'Cyt'},{1},{5 0.2},{2},{},{true},{}};
@@ -167,32 +190,20 @@ copyfile(pwd,newbackup);
 
 
 %% code: Analysis Variables
-%     customrun=false; %False analyzes all the wells, true analyzes only select few wells
-%  FastRun=2;
-%     if customrun
-%     NumSeries=FastRun; % #PROJECT: This will need to be modified to allow selected wells to run
-% 
-%     wellsSR = [1 2 48 47 3 4 46 45 59 60 86 85 61 62 84 83 63 64 82 81 65 66 80 79 145 146 192 191,...
-%              147 148 190 189 203 204 230 229 205 206 228 227 207 208 226 225 209 210 224 223];
-%     well_namesSR =   {'A01.1','A01.2','A01.3','A01.4'...
-%                     'A02.1','A02.2','A02.3','A02.4'...
-%                     'B06.1','B06.2','B06.3','B06.4'...
-%                     'B07.1','B07.2','B07.3','B07.4'...
-%                     'B08.1','B08.2','B08.3','B08.4'...
-%                     'B09.1','B09.2','B09.3','B09.4'...
-%                     'D01.1','D01.2','D01.3','D01.4'...
-%                     'D02.1','D02.2','D02.3','D02.4'...
-%                     'E06.1','E06.2','E06.3','E06.4'...
-%                     'E07.1','E07.2','E07.3','E07.4'...
-%                     'E08.1','E08.2','E08.3','E08.4'...
-%                     'E09.1','E09.2','E09.3','E09.4'};
-%     timepointsSR = [1,4,7,10,13,16,19,22,25,28,31,34,37];
-% 
-% 
-%     else
+    customrun=true; %False analyzes all the wells, true analyzes only select few wells
+    FastRun=2;
+    if customrun
+    NumSeries=FastRun; % #PROJECT: This will need to be modified to allow selected wells to run
+
+    wells = [1 12 13 14];
+    
+    timepoints = [0];
+
+
+    else
     NumSeries=r.getSeriesCount(); %The count of all the wells you imaged
-% 
-%     end
+
+    end
 NumColors=r.getEffectiveSizeC(); %The number of colors of each well you imaged
 NumTimepoint=(r.getImageCount())/NumColors; %The number of timepoints you imaged
 NumImg=NumSeries*NumTimepoint*NumColors; %The total number of images, combining everything
@@ -214,14 +225,14 @@ NumImg=NumSeries*NumTimepoint*NumColors; %The total number of images, combining 
 
 %% code: Analysis Program 
 AllData4={}; %Blank for Parfor CompSci reasons
-       parfor nn = 1 : nWorkers % Initialize logging at INFO level
+      for nn = 1 : nWorkers % Initialize logging at INFO level
         bfInitLogging('INFO'); % Initialize a new reader per worker as Bio-Formats is not thread safe
         r2 = javaObject('loci.formats.Memoizer', bfGetReader(), 0); % Initialization should use the memo file cached before entering the parallel loop
         r2.setId(ImgFile);
         
             AllData3={};%Clear because parfor  
             RunNum=0
-            for j=ParSplit+nn-2% Number of wells in ND2 File. Dependent on nn so that each worker has its own list of wells to analyze
+            for j=wellsSR+nn-2% Number of wells in ND2 File. Dependent on nn so that each worker has its own list of wells to analyze
                 
                 if j<=(NumSeries-1)
                 RunNum=RunNum+1    
@@ -242,7 +253,7 @@ AllData4={}; %Blank for Parfor CompSci reasons
                     end
                     end
                     AllData2={};%Clear because parfor 
-                    for i=0:T_Value %For all of the time points in the series, should start at zero if T_Value has -1 built in, which it should
+                    for i=timepointsSR %For all of the time points in the series, should start at zero if T_Value has -1 built in, which it should
                         Img2=zeros(SizeY,SizeX,numPlanes,'uint16');  %Make a blank shell for the images  
                                 iplane=r2.getIndex(0,0,i);
                                 for n=1:numPlanes         
@@ -275,12 +286,8 @@ AllData4={}; %Blank for Parfor CompSci reasons
                        %% Get Area and Intensity data for every combination of channels
                             LabelInput={Well,Timepoint,CytosolicPass};
 %                             LiveData=gpuArray(LiveData);
-                            if UseNvidiaGPU
+                            
                             [TidyFeat] = LabelAnalysis2(LiveData,Img2,LabelInput);
-                            else
-                                [TidyFeat] = LabelAnalysisNoGPU(LiveData,Img2,LabelInput);
-                            end
-
                                 % #PROJECT: LabelAnalysis2 was written
                                 % quickly and could likely be optimized to
                                 % run faster. It's relatively slow.

@@ -1,3 +1,4 @@
+
 %% Gal8 Recruitment MATLAB Program
 clc, clear all, close all
 Identifier = ["ST"                                  
@@ -22,11 +23,12 @@ end
 if hasAddons(2) == 0 || hasAddons(5) == 0 || hasAddons(6) == 0
     return;
 end
+%
 %% USER: Basic Aspects 
     %User Defines location of Image file and location of directory to
     %export to.
-ImgFile=char('D:\Dropbox (VU Basic Sciences)\LabConfocalOld\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\20211002BigProteinScreen001.nd2');
-exportdir=char('D:\Dropbox (VU Basic Sciences)\LabConfocalOld\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\2023-01-02-Dissertation Analysis');
+ImgFile=char('C:\Users\Duval\Downloads\20211002BigProteinScreen.nd2');
+exportdir=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Isa\2021-10-02-BigPRoteinScreen\2023-01-02-Dissertation Analysis');
     
     %Basic Information
 numPlanes=3; %How many image Planes to analyze? For example, If you have a Blue (DAPI), Green (GFP), and Red (Cy5) channel, this would be 3 
@@ -38,7 +40,7 @@ MakeCompImage=true; %Make a composite Image of the various channels and segmenta
                 %         BaxExport and Segment images to check everything in Baxter
                 %         Algorithms.
 
-Parallelize=true; %Take advantage of multiple processing cores? Generally a good idea but can cause some computers to overheat
+Parallelize=false; %Take advantage of multiple processing cores? Generally a good idea but can cause some computers to overheat
                         %Note: For troubleshooting, can be useful to change the "parfor"
                         %loop below into a regular for loop, which will stop parralel
                         %processing but allow error codes to report what's actually wrong.
@@ -190,32 +192,21 @@ copyfile(pwd,newbackup);
 
 
 %% code: Analysis Variables
-%     customrun=false; %False analyzes all the wells, true analyzes only select few wells
-%  FastRun=2;
-%     if customrun
-%     NumSeries=FastRun; % #PROJECT: This will need to be modified to allow selected wells to run
-% 
-%     wellsSR = [1 2 48 47 3 4 46 45 59 60 86 85 61 62 84 83 63 64 82 81 65 66 80 79 145 146 192 191,...
-%              147 148 190 189 203 204 230 229 205 206 228 227 207 208 226 225 209 210 224 223];
-%     well_namesSR =   {'A01.1','A01.2','A01.3','A01.4'...
-%                     'A02.1','A02.2','A02.3','A02.4'...
-%                     'B06.1','B06.2','B06.3','B06.4'...
-%                     'B07.1','B07.2','B07.3','B07.4'...
-%                     'B08.1','B08.2','B08.3','B08.4'...
-%                     'B09.1','B09.2','B09.3','B09.4'...
-%                     'D01.1','D01.2','D01.3','D01.4'...
-%                     'D02.1','D02.2','D02.3','D02.4'...
-%                     'E06.1','E06.2','E06.3','E06.4'...
-%                     'E07.1','E07.2','E07.3','E07.4'...
-%                     'E08.1','E08.2','E08.3','E08.4'...
-%                     'E09.1','E09.2','E09.3','E09.4'};
-%     timepointsSR = [1,4,7,10,13,16,19,22,25,28,31,34,37];
-% 
-% 
-%     else
+    customRun=true; % False analyzes all the wells, true analyzes only select few wells
+    FastRun=2;
+    if customRun
+    NumSeries=FastRun; % #PROJECT: This will need to be modified to allow selected wells to run
+
+    wells = [1 2 9 10 11 12 13 14 15 16 17]; % Adjust custom run wells using 1 based indexing
+    %wells = wells - 1;
+    timepoints = [1]; % Adjust custom run timepoints using 1 based indexing
+    timepoints = timepoints - 1; 
+
+
+    else
     NumSeries=r.getSeriesCount(); %The count of all the wells you imaged
-% 
-%     end
+
+    end
 NumColors=r.getEffectiveSizeC(); %The number of colors of each well you imaged
 NumTimepoint=(r.getImageCount())/NumColors; %The number of timepoints you imaged
 NumImg=NumSeries*NumTimepoint*NumColors; %The total number of images, combining everything
@@ -237,14 +228,14 @@ NumImg=NumSeries*NumTimepoint*NumColors; %The total number of images, combining 
 
 %% code: Analysis Program 
 AllData4={}; %Blank for Parfor CompSci reasons
-      parfor nn = 1 : nWorkers % Initialize logging at INFO level
+      for nn = 1 : nWorkers % Initialize logging at INFO level
         bfInitLogging('INFO'); % Initialize a new reader per worker as Bio-Formats is not thread safe
         r2 = javaObject('loci.formats.Memoizer', bfGetReader(), 0); % Initialization should use the memo file cached before entering the parallel loop
         r2.setId(ImgFile);
         
             AllData3={};%Clear because parfor  
             RunNum=0
-            for j=ParSplit+nn-2% Number of wells in ND2 File. Dependent on nn so that each worker has its own list of wells to analyze
+            for j=wells+nn-2% Number of wells in ND2 File. Dependent on nn so that each worker has its own list of wells to analyze
                 
                 if j<=(NumSeries-1)
                 RunNum=RunNum+1    
@@ -253,8 +244,10 @@ AllData4={}; %Blank for Parfor CompSci reasons
                 r2.setSeries(CurrSeries); %##uses BioFormats function, can be swapped with something else (i forget what) if it's buggy with the GUI
                 fname = r2.getSeries; %gets the name of the series using BioFormats
                 Well=num2str(fname,'%05.f'); %Formats the well name for up to 5 decimal places of different wells, could increase but 5 already feels like overkill 
+                if customRun == false
                 T_Value = r2.getSizeT()-1; %Very important, the timepoints of the images. Returns the total number of timepoints, the -1 is important.
-%                 T_Value = 17
+                timepoints = double(0):double(T_Value);
+                end
                 SizeX=r2.getSizeX(); %Number of pixels in image in X dimension
                 SizeY=r2.getSizeY(); %Number of pixels in image in Y Dimension
                     
@@ -265,7 +258,7 @@ AllData4={}; %Blank for Parfor CompSci reasons
                     end
                     end
                     AllData2={};%Clear because parfor 
-                    for i=0:T_Value %For all of the time points in the series, should start at zero if T_Value has -1 built in, which it should
+                    for i=timepoints %For all of the time points in the series, should start at zero if T_Value has -1 built in, which it should
                         Img2=zeros(SizeY,SizeX,numPlanes,'uint16');  %Make a blank shell for the images  
                                 iplane=r2.getIndex(0,0,i);
                                 for n=1:numPlanes         

@@ -33,6 +33,9 @@ for k =1:length(ImageAnalyses)
                 [bw4_perim,bw4,Label,Data] = Gal8(AnaImage,AnaSettings,Cyt_bw4,MiPerPix);
              case 'Drug'
                 [bw4,bw4_perim,Label,Data] = Drug(AnaImage,AnaSettings,MiPerPix);  
+
+            case 'Trans'
+            [bw4,bw4_perim,Label,Data] = Trans(AnaImage,AnaSettings,MiPerPix); 
         end
         LiveData{k}.AnaImage = AnaImage; %Important! Store all of the information about the current well as you go so you can reference if need be!
         LiveData{k}.bw4 = bw4;

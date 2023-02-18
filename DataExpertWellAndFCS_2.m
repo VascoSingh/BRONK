@@ -18,28 +18,28 @@ TestTable2=DataTable;
 InputTable=TestTable2(1:30000,:);
 
 
-PreppedTable=removevars(InputTable,["Centroid","BoundingBox"]);
-PreppedTable=convertvars(PreppedTable,@isnumeric,'single');
+PreppedTable=removevars(InputTable,["Centroid","BoundingBox"]); %some variables not compatible with analysis
+PreppedTable=convertvars(PreppedTable,@isnumeric,'single'); %single precision all numbers to prevent problems
 
-SumInt=(PreppedTable{:,"Area"}.*PreppedTable{:,"MeanIntensity"});
-PreppedTable.SumInt=SumInt;
+SumInt=(PreppedTable{:,"Area"}.*PreppedTable{:,"MeanIntensity"}); %Get sum intensity value from existing numbers
+PreppedTable.SumInt=SumInt; %add SumINt variable to the data set
 
-GroupNum=vlookup(PreppedTable.WellNum,WellKey,2); 
-PreppedTable.GroupNum=GroupNum;
+GroupNum=vlookup(PreppedTable.WellNum,WellKey,2); %I think i had to add an add-on for this to work, this is so that in the next step we can label each well with a group number
+PreppedTable.GroupNum=GroupNum; %add a group number, for instance different treatment groups, each well is a replicate
 % PreppedTable.AnaProgram=strcat(num2str(PreppedTable.AnaPass),'_',PreppedTable.AnaProgram);
 
-PreppedTable(ismember(PreppedTable.Cell,0),:)=[];
-PreppedTable(~ismember(PreppedTable.AnaPass,AnaPassIncluded),:)=[];
-PreppedTable.AnaPass=strcat('A',num2str(PreppedTable.AnaPass),'_',PreppedTable.AnaProgram);
-PreppedTable.ImgPlane=strcat({'P'},num2str(PreppedTable.ImgPlane));
+PreppedTable(ismember(PreppedTable.Cell,0),:)=[]; %Filter out blank cells and whole-well data
+PreppedTable(~ismember(PreppedTable.AnaPass,AnaPassIncluded),:)=[]; %filter out unwanted analysis passes
+PreppedTable.AnaPass=strcat('A',num2str(PreppedTable.AnaPass),'_',PreppedTable.AnaProgram); %add labels to make data easier to analyze after run
+PreppedTable.ImgPlane=strcat({'P'},num2str(PreppedTable.ImgPlane)); %add labels to make data easier to analyze after run
 
 %% WholeWellDataPrep
 if OutputPerWell
-StatsWellTimeAnaPlane=groupsummary(PreppedTable,["GroupNum","WellNum","TimeNum","AnaPass","ImgPlane"],{'sum','mean','median','mode','var','std','min','max','range'},["Area","EquivDiameter","Extent","MeanIntensity","SumInt"]);
+StatsWellTimeAnaPlane=groupsummary(PreppedTable,["GroupNum","WellNum","TimeNum","AnaPass","ImgPlane"],{'sum','mean','median','mode','var','std','min','max','range'},["Area","EquivDiameter","Extent","MeanIntensity","SumInt"]); %Get per-image-plane level data
 
-MeansConstantWellTimeAna=groupsummary(PreppedTable,["GroupNum","WellNum","TimeNum","AnaPass"],{"mean"},["Area","EquivDiameter","Extent"]);
-StatsWellTimeAna=unstack(StatsWellTimeAnaPlane,[6:width(StatsWellTimeAnaPlane)],{'ImgPlane'});
-WellTimeAna=join(MeansConstantWellTimeAna,StatsWellTimeAna,'Keys',[1 2 3 4]);
+MeansConstantWellTimeAna=groupsummary(PreppedTable,["GroupNum","WellNum","TimeNum","AnaPass"],{"mean"},["Area","EquivDiameter","Extent"]); %get per analysis pass level data
+StatsWellTimeAna=unstack(StatsWellTimeAnaPlane,[6:width(StatsWellTimeAnaPlane)],{'ImgPlane'}); %put all of the per-image plane data on a single row for each analysis pass
+WellTimeAna=join(MeansConstantWellTimeAna,StatsWellTimeAna,'Keys',[1 2 3 4]); %Put all the data together
 
 WellTimeData=unstack(WellTimeAna,[5:width(WellTimeAna)],{'AnaPass'});
 % idx=ismissing(WellTimeData(:,:));
