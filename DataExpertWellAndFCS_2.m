@@ -1,21 +1,21 @@
-
-load('untitled.mat')
-
 %% User Inputs
 CellCountPlane=1;
-OutputPerWell = false;
+OutputPerWell = true;
 OutputFCS = true;
 exportdir=char('D:\Dropbox (VU Basic Sciences)\Duvall Confocal\Duvall Lab\Jackey\2022-09-15-Gal8-ConjugatesChloroquine\Analysis\Outputs\FCSExport');
-DataTable=C;
+DataTable=Tablebig;
 AnaPassIncluded=[2,3,4,5];
 WellKey=[        1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	35	36	37	38	39	40	41	42	43	44	45	46	47	48	49	50	51	52	53	54	55	56	57	58	59	60	61	62	63	64	65	66	67	68	69	70	71	72;
                 12	11	10	9	8	7	6	5	4	3	2	1	1	2	3	4	5	6	7	8	9	10	11	12	12	11	10	9	8	7	6	5	4	3	2	1	1	2	3	4	5	6	7	8	9	10	11	12	12	11	10	9	8	7	6	5	4	3	2	1	1	13	13	13	13	13	14	14	14	14	15	12
             ]';
 
+% WellKey=[ 1 2 ;
+%            1  8
+%            ]';
 %% Prep Code 
 run=char(datetime(clock),"yyyy-MM-dd-HH-mm-ss"); 
 TestTable2=DataTable;
-InputTable=TestTable2(1:30000,:);
+InputTable=TestTable2(1:30000,:); %Only include beginning for testing
 
 
 PreppedTable=removevars(InputTable,["Centroid","BoundingBox"]); %some variables not compatible with analysis
@@ -23,7 +23,7 @@ PreppedTable=convertvars(PreppedTable,@isnumeric,'single'); %single precision al
 
 SumInt=(PreppedTable{:,"Area"}.*PreppedTable{:,"MeanIntensity"}); %Get sum intensity value from existing numbers
 PreppedTable.SumInt=SumInt; %add SumINt variable to the data set
-
+vlookup(PreppedTable.WellNum,WellKey,2)
 GroupNum=vlookup(PreppedTable.WellNum,WellKey,2); %I think i had to add an add-on for this to work, this is so that in the next step we can label each well with a group number
 PreppedTable.GroupNum=GroupNum; %add a group number, for instance different treatment groups, each well is a replicate
 % PreppedTable.AnaProgram=strcat(num2str(PreppedTable.AnaPass),'_',PreppedTable.AnaProgram);
@@ -85,19 +85,19 @@ mkdir(FCSFolder)
 
     for i=unique(WellColumn)'
             
-%             WellPoint = num2str(i,'%03.f');
+            WellPoint = num2str(i,'%03.f');
             CurrWell=FCSOutData(FCSOutData(:,2)==i,:);
             TimeColumn=CurrWell(:,3);
         for j=unique(TimeColumn)'
-                 Timepoint = num2str(j,'%03.f'); %Creates a string so that the BioFormats can read it
-                 CurrTime=double(CurrWell(TimeColumn==j,:));
-                 maxdata(:,j)=(max(CurrTime))';
-%                 WellID=strcat('w',WellPoint,'t',Timepoint);
-%                 FCSFileName=strcat(FCSFolder,WellID,'.fcs') ; 
-%                 TEXT.WELLID=WellID;
-%                 TEXT.FIL=WellID;
-%                 TEXT.COM=WellID;
-%                 writeFCS(FCSFileName,CurrTime,TEXT); 
+                Timepoint = num2str(j,'%03.f'); %Creates a string so that the BioFormats can read it
+                CurrTime=double(CurrWell(TimeColumn==j,:));
+                maxdata(:,j)=(max(CurrTime))';
+                WellID=strcat('w',WellPoint,'t',Timepoint);
+                FCSFileName=strcat(FCSFolder,WellID,'.fcs'); 
+                TEXT.WELLID=WellID;
+                TEXT.FIL=WellID;
+                TEXT.COM=WellID;
+                writeFCS(FCSFileName,CurrTime,TEXT); 
           
     
         AllMaxes(i)={maxdata};
