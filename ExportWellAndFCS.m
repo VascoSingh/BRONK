@@ -4,7 +4,7 @@ function ExportWellAndFCS(DataTable, wells, AnaPassIncluded, OutputPerWell, Outp
     %TestTable2=DataTable;
     InputTable = DataTable;
     %InputTable=TestTable2(1:30000,:); %Only include beginning for testing
-    
+    %TODO
     %WellKey = [wells, 1:length(wells)];
     PreppedTable=removevars(InputTable,["Centroid","BoundingBox"]) %some variables not compatible with analysis
     PreppedTable=convertvars(PreppedTable,@isnumeric,'single'); %single precision all numbers to prevent problems
