@@ -340,4 +340,4 @@ MatSaveName=fullfile(RunDirectory,strcat(run,'.mat'));
 ExcelName=fullfile(RunDirectory,strcat(run,'.txt')); %Prepare excel file name
 save(MatSaveName,'Tablebig')
 writetable(Tablebig,ExcelName) %Write Excel file of all analysis Data
-% ExportWellAndFCS(Tablebig,wells,[2,3,4,5,6],true,true,exportdir)
+ExportWellAndFCS(Tablebig,wells,[2,3,4,5,6],false,true,exportdir)

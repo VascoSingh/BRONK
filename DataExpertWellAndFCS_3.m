@@ -1,3 +1,5 @@
+load("newdata.mat")
+
 %% User Inputs
 CellCountPlane=1;
 OutputPerWell = true;
@@ -15,7 +17,7 @@ AnaPassIncluded=[2,3,4,5];
 %% Prep Code 
 run=char(datetime(clock),"yyyy-MM-dd-HH-mm-ss"); 
 TestTable2=DataTable;
-InputTable=TestTable2(1:30000,:); %Only include beginning for testing
+InputTable=TestTable2(1:1000,:); %Only include beginning for testing
 
 
 PreppedTable=removevars(InputTable,["Centroid","BoundingBox"]); %some variables not compatible with analysis
@@ -26,7 +28,7 @@ PreppedTable.SumInt=SumInt; %add SumINt variable to the data set
 
 GroupNum=vlookup(PreppedTable.WellNum,WellKey,2); %I think i had to add an add-on for this to work, this is so that in the next step we can label each well with a group number
 PreppedTable.GroupNum=GroupNum; %add a group number, for instance different treatment groups, each well is a replicate
-% PreppedTable.AnaProgram=strcat(num2str(PreppedTable.AnaPass),'_',PreppedTable.AnaProgram);
+PreppedTable.AnaProgram=strcat(num2str(PreppedTable.AnaPass),'_',PreppedTable.AnaProgram);
 
 PreppedTable(ismember(PreppedTable.Cell,0),:)=[]; %Filter out blank cells and whole-well data
 PreppedTable(~ismember(PreppedTable.AnaPass,AnaPassIncluded),:)=[]; %filter out unwanted analysis passes

@@ -12,14 +12,14 @@ function ExportWellAndFCS(DataTable, wells, AnaPassIncluded, OutputPerWell, Outp
     SumInt=(PreppedTable{:,"Area"}.*PreppedTable{:,"MeanIntensity"}); %Get sum intensity value from existing numbers
     PreppedTable.SumInt=SumInt; %add SumINt variable to the data set
     
-    GroupNum=repmat([1:length(wells)]',ceil(size(Tablebig, 1)/(length(wells))),1);
-    GroupNum=GroupNum(1:size(TableBig,1));%I think i had to add an add-on for this to work, this is so that in the next step we can label each well with a group number
+    GroupNum=repmat([1:length(wells)]',ceil(size(InputTable, 1)/(length(wells))),1);
+    GroupNum=GroupNum(1:size(InputTable,1));%I think i had to add an add-on for this to work, this is so that in the next step we can label each well with a group number
     PreppedTable.GroupNum=GroupNum; %add a group number, for instance different treatment groups, each well is a replicate
-    % PreppedTable.AnaProgram=strcat(num2str(PreppedTable.AnaPass),'_',PreppedTable.AnaProgram);
-    
+    PreppedTable.AnaProgram=strcat(num2str(PreppedTable.AnaPass));
+
     PreppedTable(ismember(PreppedTable.Cell,0),:)=[]; %Filter out blank cells and whole-well data
     PreppedTable(~ismember(PreppedTable.AnaPass,AnaPassIncluded),:)=[]; %filter out unwanted analysis passes
-    PreppedTable.AnaPass=strcat('A',num2str(PreppedTable.AnaPass),'_',PreppedTable.AnaProgram); %add labels to make data easier to analyze after run
+    PreppedTable.AnaPass=strcat(num2str(PreppedTable.AnaPass)); %add labels to make data easier to analyze after run
     PreppedTable.ImgPlane=strcat({'P'},num2str(PreppedTable.ImgPlane)); %add labels to make data easier to analyze after run
     
     %% WholeWellDataPrep
